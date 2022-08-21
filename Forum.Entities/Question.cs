@@ -7,7 +7,8 @@ public class Question
     public string Content { get; set; }
     public int Rating { get; set; }
     public DateTime Date { get; set; }
-    public Guid AuthorId { get; set; }
-    public User Author { get; set; }
     public ICollection<Answer> Answers { get; set; }
+#nullable enable
+    public Guid? AuthorId { get; set; }
+    public User? Author { get; set; }
 }
