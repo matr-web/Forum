@@ -5,7 +5,7 @@ namespace Forum.WebAPI.Repositories;
 
 public interface IQuestionRepository : IDisposable
 {
-    IEnumerable<Question> GetQuestion();
+    IEnumerable<Question> GetQuestions();
     Question GetQuestionByID(int questionId);
     void InsertQuestion(Question question);
     void DeleteQuestion(int questionId);
@@ -22,7 +22,7 @@ public class QuestionRepository : IQuestionRepository, IDisposable
         this.context = context;
     }
 
-    public IEnumerable<Question> GetQuestion()
+    public IEnumerable<Question> GetQuestions()
     {
         return context.Questions.ToList();
     }

@@ -5,7 +5,7 @@ namespace Forum.WebAPI.Repositories;
 
 public interface IAnswerRepository : IDisposable
 {
-    IEnumerable<Answer> GetAnswer();
+    IEnumerable<Answer> GetAnswers();
     Answer GetAnswerByID(int answerId);
     void InsertAnswer(Answer answer);
     void DeleteAnswer(int answerId);
@@ -13,16 +13,16 @@ public interface IAnswerRepository : IDisposable
     void Save();
 }
 
-public class AnswerRepository : IAnswerRepository, IDisposable
+public class QuestionRepository : IAnswerRepository, IDisposable
 {
     private DatabaseContext context;
 
-    public AnswerRepository(DatabaseContext context)
+    public QuestionRepository(DatabaseContext context)
     {
         this.context = context;
     }
 
-    public IEnumerable<Answer> GetAnswer()
+    public IEnumerable<Answer> GetAnswers()
     {
         return context.Answers.ToList();
     }
