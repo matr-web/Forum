@@ -8,6 +8,7 @@ public class Answer
     public DateTime Date { get; set; }
     public int QuestionId { get; set; }
     public Question Question { get; set; }
-    public Guid AuthorId { get; set; }
-    public User Author { get; set; }
+#nullable enable
+    public Guid? AuthorId { get; set; }
+    public User? Author { get; set; }
 }
