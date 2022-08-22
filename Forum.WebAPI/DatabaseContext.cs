@@ -52,7 +52,7 @@ public class DatabaseContext : DbContext
             mb.HasMany(q => q.Answers)
             .WithOne(a => a.Question)
             .HasForeignKey(a => a.QuestionId)
-            .OnDelete(DeleteBehavior.ClientCascade);  
+            .OnDelete(DeleteBehavior.ClientCascade);
         });
     }
 

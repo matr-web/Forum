@@ -1,50 +1,55 @@
 ﻿using Forum.Entities;
 using Forum.WebAPI.Repositories;
 
-namespace Forum.WebAPI.Services;
-
-public interface IQuestionService
+namespace Forum.WebAPI.Services
 {
-    public IEnumerable<Question> GetQuestions();
-    public Question GetQuestionById(int id);
-    public void InsertQuestion(Question question);
-    public void DeleteQuestion(int id);
-    public void UpdateQuestion(Question question);
-}
-
-public class QuestionService : IQuestionService
-{
-    private readonly IQuestionRepository QuestionRepository;
-
-    public QuestionService(IQuestionRepository questionRepository)
+    public interface IQuestionService
     {
-        QuestionRepository = questionRepository;
+        public IEnumerable<Question> GetQuestions();
+        public Question GetQuestionById(int id);
+        public void InsertQuestion(Question question);
+        public void DeleteQuestion(int id);
+        public void UpdateQuestion(Question question);
     }
 
-    public IEnumerable<Question> GetQuestions() => QuestionRepository.GetQuestions();
-
-    public Question GetQuestionById(int id) => QuestionRepository.GetQuestionByID(id);
-
-    public void DeleteQuestion(int id)
+    public class QuestionService : IQuestionService
     {
-        QuestionRepository.DeleteQuestion(id);
-        QuestionRepository.Save();
-    }
+        private readonly IQuestionRepository questionRepository;
 
-    public void InsertQuestion(Question question)
-    {
-        QuestionRepository.InsertQuestion(question);
-        QuestionRepository.Save();
-    }
+        public QuestionService(IQuestionRepository questionRepository)
+        {
+            this.questionRepository = questionRepository;
+        }
 
-    public void UpdateQuestion(Question question)
-    {
-        QuestionRepository.UpdateQuestion(question);
-        QuestionRepository.Save();
-    }
+        public IEnumerable<Question> GetQuestions() => questionRepository.GetQuestions();
 
-    public void Dispose()
-    {
-        QuestionRepository.Dispose();
+        public Question GetQuestionById(int id) => questionRepository.GetQuestionByID(id);
+
+        public void InsertQuestion(Question question)
+        {
+            question.Date = DateTime.Now;
+
+            questionRepository.InsertQuestion(question);
+            questionRepository.Save();
+        }
+
+        public void UpdateQuestion(Question question)
+        {
+            question.Date = DateTime.Now;
+
+            questionRepository.UpdateQuestion(question);
+            questionRepository.Save();
+        }
+
+        public void DeleteQuestion(int id)
+        {
+            questionRepository.DeleteQuestion(id);
+            questionRepository.Save();
+        }   
+
+        public void Dispose()
+        {
+            questionRepository.Dispose();
+        }
     }
 }
