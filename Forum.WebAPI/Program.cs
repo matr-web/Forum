@@ -1,4 +1,6 @@
 using Forum.WebAPI;
+using Forum.WebAPI.Repositories;
+using Forum.WebAPI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +13,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+
+builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+
+builder.Services.AddScoped<IAnswerService, AnswerService>();
+builder.Services.AddScoped<IQuestionService, QuestionService>();
 
 var app = builder.Build();
 

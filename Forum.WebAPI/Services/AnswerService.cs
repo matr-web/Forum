@@ -14,37 +14,41 @@ public interface IAnswerService
 
 public class AnswerService : IAnswerService
 {
-    private readonly IAnswerRepository AnswerRepository;
+    private readonly IAnswerRepository answerRepository; 
 
     public AnswerService(IAnswerRepository answerRepository)
     {
-        AnswerRepository = answerRepository;
+        this.answerRepository = answerRepository;
     }
 
-    public IEnumerable<Answer> GetAnswers() => AnswerRepository.GetAnswers();
+    public IEnumerable<Answer> GetAnswers() => answerRepository.GetAnswers();
 
-    public Answer GetAnswerById(int id) => AnswerRepository.GetAnswerByID(id);
-
-    public void DeleteAnswer(int id)
-    {
-        AnswerRepository.DeleteAnswer(id);
-        AnswerRepository.Save();
-    }
+    public Answer GetAnswerById(int id) => answerRepository.GetAnswerByID(id);
 
     public void InsertAnswer(Answer answer)
     {
-        AnswerRepository.InsertAnswer(answer);
-        AnswerRepository.Save();
+        answer.Date = DateTime.Now;
+
+        answerRepository.InsertAnswer(answer);
+        answerRepository.Save();
     }
 
     public void UpdateAnswer(Answer answer)
     {
-        AnswerRepository.UpdateAnswer(answer);
-        AnswerRepository.Save();
+        answer.Date = DateTime.Now;
+
+        answerRepository.UpdateAnswer(answer);
+        answerRepository.Save();
     }
 
+    public void DeleteAnswer(int id)
+    {
+        answerRepository.DeleteAnswer(id);
+        answerRepository.Save();
+    }
+    
     public void Dispose()
     {
-        AnswerRepository.Dispose();
+        answerRepository.Dispose();
     }
 }
