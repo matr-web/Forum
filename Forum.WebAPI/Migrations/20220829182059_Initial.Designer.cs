@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Forum.WebAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20220821094517_testNullable2")]
-    partial class testNullable2
+    [Migration("20220829182059_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -32,7 +32,7 @@ namespace Forum.WebAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<Guid?>("AuthorId")
+                    b.Property<Guid>("AuthorId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
@@ -42,9 +42,6 @@ namespace Forum.WebAPI.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("QuestionId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Rating")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -73,9 +70,6 @@ namespace Forum.WebAPI.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
                     b.Property<string>("Topic")
                         .HasColumnType("nvarchar(max)");
 
@@ -86,11 +80,62 @@ namespace Forum.WebAPI.Migrations
                     b.ToTable("Questions");
                 });
 
+            modelBuilder.Entity("Forum.Entities.Rating", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int?>("AnswerId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Value")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnswerId");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("Ratings");
+                });
+
+            modelBuilder.Entity("Forum.Entities.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+                });
+
             modelBuilder.Entity("Forum.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -104,7 +149,12 @@ namespace Forum.WebAPI.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("Last Name");
 
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("Users");
                 });
@@ -114,7 +164,8 @@ namespace Forum.WebAPI.Migrations
                     b.HasOne("Forum.Entities.User", "Author")
                         .WithMany("Answers")
                         .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("Forum.Entities.Question", "Question")
                         .WithMany("Answers")
@@ -137,9 +188,57 @@ namespace Forum.WebAPI.Migrations
                     b.Navigation("Author");
                 });
 
+            modelBuilder.Entity("Forum.Entities.Rating", b =>
+                {
+                    b.HasOne("Forum.Entities.Answer", "Answer")
+                        .WithMany("Ratings")
+                        .HasForeignKey("AnswerId")
+                        .OnDelete(DeleteBehavior.ClientCascade);
+
+                    b.HasOne("Forum.Entities.User", "Author")
+                        .WithMany("Ratings")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Forum.Entities.Question", "Question")
+                        .WithMany("Ratings")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.ClientCascade);
+
+                    b.Navigation("Answer");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("Forum.Entities.User", b =>
+                {
+                    b.HasOne("Forum.Entities.Role", "Role")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("Forum.Entities.Answer", b =>
+                {
+                    b.Navigation("Ratings");
+                });
+
             modelBuilder.Entity("Forum.Entities.Question", b =>
                 {
                     b.Navigation("Answers");
+
+                    b.Navigation("Ratings");
+                });
+
+            modelBuilder.Entity("Forum.Entities.Role", b =>
+                {
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Forum.Entities.User", b =>
@@ -147,6 +246,8 @@ namespace Forum.WebAPI.Migrations
                     b.Navigation("Answers");
 
                     b.Navigation("Questions");
+
+                    b.Navigation("Ratings");
                 });
 #pragma warning restore 612, 618
         }
