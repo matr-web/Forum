@@ -1,4 +1,4 @@
-﻿using Forum.Entities;
+﻿using Forum.WebAPI.Dto_s;
 using Forum.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,56 +16,46 @@ public class AnswersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Answer>>> GetAsync()
+    public async Task<ActionResult<IEnumerable<AnswerDto>>> GetAsync()
     {
-        IEnumerable<Answer> answers = await answersService.GetAnswersAsync();
+        IEnumerable<AnswerDto> answersDtos = await answersService.GetAnswersAsync();
 
-        if (answers is null || answers.Count() == 0)
+        if (answersDtos is null || answersDtos.Count() == 0)
         {
-            return NotFound(answers);
+            return NotFound(answersDtos);
         }
 
-        return Ok(answers);
+        return Ok(answersDtos);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Answer>> GetAsync(int id)
+    public async Task<ActionResult<AnswerDto>> GetAsync(int id)
     {
-        Answer answer = await answersService.GetAnswerByIdAsync(id);
+        AnswerDto answerDto = await answersService.GetAnswerByIdAsync(id);
 
-        if (answer is null)
+        if (answerDto is null)
         {
-            return NotFound(answer);
+            return NotFound(answerDto);
         }
 
-        return Ok(answer);
+        return Ok(answerDto);
     }
 
     [HttpPost]
-    public async Task<ActionResult> PostAsync([FromBody] Answer answer)
+    public async Task<ActionResult> PostAsync([FromBody] CreateAnswerDto creatAnswerDto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
+        int answerId = await answersService.InsertAnswerAsync(creatAnswerDto);
 
-        await answersService.InsertAnswerAsync(answer);
-
-        return Created($"api/answers/{answer.Id}", null);
+        return Created($"api/answers/{answerId}", null);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> PutAsync(int id, [FromBody] Answer answer)
+    public async Task<ActionResult> PutAsync(int id, [FromBody] UpdateAnswerDto updateAnswerDto)
     {
-        if (!ModelState.IsValid)
+        if (id == updateAnswerDto.Id)
         {
-            return BadRequest(ModelState);
-        }
-
-        if (id == answer.Id)
-        {
-            await answersService.UpdateAnswerAsync(answer);
-            return Ok();
+            await answersService.UpdateAnswerAsync(updateAnswerDto);
+            return Ok(updateAnswerDto);
         }
 
         return NotFound();

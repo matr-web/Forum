@@ -10,7 +10,7 @@ public class Question
 
     public string Content { get; set; }
 
-    public DateTime Date { get; set; }
+    public DateTime Date { get; set; } = DateTime.Now;
 
     public Guid? AuthorId { get; set; }
     public virtual User Author { get; set; }
