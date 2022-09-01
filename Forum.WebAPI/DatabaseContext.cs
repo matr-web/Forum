@@ -42,13 +42,13 @@ public class DatabaseContext : DbContext
 
             mb.Property(u => u.RoleId).IsRequired();
 
-            //If u delete Role User alsow will be deleted.
+            // If u delete Role User alsow will be deleted.
             mb.HasOne(u => u.Role)
            .WithMany(r => r.Users)
            .HasForeignKey(u => u.RoleId)
            .OnDelete(DeleteBehavior.ClientCascade);
 
-            //If u delete User from db his Questions, Answers and Ratings remain in the db.
+            // If u delete User from db his Questions, Answers and Ratings remain in the db.
             mb.HasMany(u => u.Questions)
             .WithOne(q => q.Author)
             .HasForeignKey(q => q.AuthorId)
@@ -70,8 +70,11 @@ public class DatabaseContext : DbContext
             mb.Property(q => q.Topic).IsRequired();
             mb.Property(q => q.Content).IsRequired();
 
-            //If u delete Question from db ratings and answers for this Question alsow will be deleted.
-            mb.HasMany(q => q.Answers)
+            // Set the current time as Question Date.
+            mb.Property(q => q.Date).HasDefaultValueSql("getdate()");
+
+            // If u delete Question from db ratings and answers for this Question alsow will be deleted.
+            mb.HasMany(q => q.Answers)       
             .WithOne(a => a.Question)
             .HasForeignKey(a => a.QuestionId)
             .OnDelete(DeleteBehavior.ClientCascade);
@@ -85,6 +88,9 @@ public class DatabaseContext : DbContext
         modelBuilder.Entity<Answer>(mb =>
         {
            mb.Property(q => q.Content).IsRequired();
+
+           // Set the current time as Answer Date.
+           mb.Property(q => q.Date).HasDefaultValueSql("getdate()");
 
            mb.HasMany(q => q.Ratings)
           .WithOne(r => r.Answer)

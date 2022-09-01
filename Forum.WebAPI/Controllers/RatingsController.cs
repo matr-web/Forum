@@ -1,4 +1,4 @@
-﻿using Forum.Entities;
+﻿using Forum.WebAPI.Dto_s;
 using Forum.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,42 +16,32 @@ public class RatingsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Rating>>> GetAsync()
+    public async Task<ActionResult<IEnumerable<RatingDto>>> GetAsync()
     {
-        IEnumerable<Rating> ratings = await ratingsService.GetRatingsAsync();
+        IEnumerable<RatingDto> ratingDtos = await ratingsService.GetRatingsAsync();
 
-        if (ratings is null || ratings.Count() == 0)
+        if (ratingDtos is null || ratingDtos.Count() == 0)
         {
-            return NotFound(ratings);
+            return NotFound(ratingDtos);
         }
 
-        return Ok(ratings);
+        return Ok(ratingDtos);
     }
 
     [HttpPost]
-    public async Task<ActionResult> PostAsync([FromBody] Rating rating)
+    public async Task<ActionResult> PostAsync([FromBody] CreateRatingDto createRatingDto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
+        int ratingId = await ratingsService.InsertRatingAsync(createRatingDto);
 
-        await ratingsService.InsertRatingAsync(rating);
-
-        return Created($"api/ratings/{rating.Id}", null);
+        return Created($"api/ratings/{ratingId}", null);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> PutAsync(int id, [FromBody] Rating rating)
+    public async Task<ActionResult> PutAsync(int id, [FromBody] UpdateRatingDto updateRatingDto)
     {
-        if (!ModelState.IsValid)
+        if (id == updateRatingDto.Id)
         {
-            return BadRequest(ModelState);
-        }
-
-        if (id == rating.Id)
-        {
-            await ratingsService.UpdateRatingAsync(rating);
+            await ratingsService.UpdateRatingAsync(updateRatingDto);
             return Ok();
         }
 

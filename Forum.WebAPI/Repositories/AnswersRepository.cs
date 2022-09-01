@@ -24,12 +24,18 @@ public class AnswersRepository : IAnswersRepository
 
     public async Task<IEnumerable<Answer>> GetAnswersAsync()
     {
-        return await context.Answers.Include(q => q.Ratings).ToListAsync();
+        return await context.Answers
+            .Include(a => a.Ratings)
+            .Include(a => a.Author)
+            .ToListAsync();
     }
 
     public async Task<Answer> GetAnswerByIDAsync(int id)
     {
-        return await context.Answers.FindAsync(id);
+        return await context.Answers
+            .Include(a => a.Ratings)
+            .Include(a => a.Author)
+            .FirstOrDefaultAsync(a => a.Id == id);
     }
 
     public async Task InsertAnswerAsync(Answer answer)

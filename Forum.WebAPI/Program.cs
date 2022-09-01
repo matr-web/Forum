@@ -15,7 +15,11 @@ builder.Services.AddControllers().AddJsonOptions(x =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add DbContext.
 builder.Services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+
+// Add AutoMapper.
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddScoped<IAnswersRepository, AnswersRepository>();
 builder.Services.AddScoped<IQuestionsRepository, QuestionsRepository>();
@@ -23,9 +27,12 @@ builder.Services.AddScoped<IQuestionsRepository, QuestionsRepository>();
 builder.Services.AddScoped<IAnswersService, AnswersService>();
 builder.Services.AddScoped<IQuestionsService, QuestionsService>();
 
+builder.Services.AddScoped<IRatingsRepository, RatingsRepository>();
+builder.Services.AddScoped<IRatingsService, RatingsService>();
+
 var app = builder.Build();
 
-//Seed Data.
+// Seed Data.
 using var scope = app.Services.CreateScope();
 var dbContext = scope.ServiceProvider.GetService<DatabaseContext>();
 SeedData.GenerateUsers(dbContext);

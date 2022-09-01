@@ -8,14 +8,14 @@ public class Answer
 
     public string Content { get; set; }
 
-    public DateTime Date { get; set; }
+    public DateTime Date { get; set; } = DateTime.Now;
 
     public int QuestionId { get; set; }
     public virtual Question Question { get; set; }
 
     public virtual ICollection<Rating> Ratings { get; set; }
 
-    public Guid AuthorId { get; set; }
+    public Guid? AuthorId { get; set; }
     public virtual User Author { get; set; }
 
     [NotMapped]
