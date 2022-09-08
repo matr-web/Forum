@@ -56,7 +56,7 @@ public class QuestionsController : ControllerBase
         if (id == updateQuestionDto.Id)
         {
             await questionsService.UpdateQuestionAsync(updateQuestionDto);
-            return Ok();
+            return Ok(updateQuestionDto);
         }
 
         return NotFound();

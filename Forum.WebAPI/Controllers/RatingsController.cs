@@ -42,7 +42,7 @@ public class RatingsController : ControllerBase
         if (id == updateRatingDto.Id)
         {
             await ratingsService.UpdateRatingAsync(updateRatingDto);
-            return Ok();
+            return Ok(updateRatingDto);
         }
 
         return NotFound();

@@ -51,8 +51,8 @@ public class SeedData
                .RuleFor(u => u.FirstName, f => f.Person.FirstName)
                .RuleFor(u => u.LastName, f => f.Person.LastName)
                .RuleFor(u => u.Email, f => f.Person.Email)
+               .RuleFor(u => u.Username, f => f.Person.UserName)
                .RuleFor(u => u.Password, f => f.Person.FirstName + "123")
-               .RuleFor(u => u.ConfirmPassword, f => f.Person.FirstName + "123")
                .RuleFor(u => u.RoleId, 1)
                .RuleFor(u => u.Role, administatorRole);
 
@@ -60,10 +60,9 @@ public class SeedData
                .RuleFor(u => u.FirstName, f => f.Person.FirstName)
                .RuleFor(u => u.LastName, f => f.Person.LastName)
                .RuleFor(u => u.Email, f => f.Person.Email)
-               .RuleFor(u => u.Password, f => f.Person.FirstName + "123")
-               .RuleFor(u => u.ConfirmPassword, f => f.Person.FirstName + "123")
+               .RuleFor(u => u.Username, f => f.Person.UserName)
                .RuleFor(u => u.RoleId, 2)
-               .RuleFor(u => u.Role, userRole); ;
+               .RuleFor(u => u.Role, userRole); 
 
             var administrators = administratorsGenerator.Generate(20);
             var users = usersGenerator.Generate(20);

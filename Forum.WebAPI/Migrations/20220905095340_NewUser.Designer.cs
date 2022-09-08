@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Forum.WebAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20220831163411_DefaultDate")]
-    partial class DefaultDate
+    [Migration("20220905095340_NewUser")]
+    partial class NewUser
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -159,8 +159,17 @@ namespace Forum.WebAPI.Migrations
                     b.Property<string>("Password")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<byte[]>("PasswordHash")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("PasswordSalt")
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

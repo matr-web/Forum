@@ -40,7 +40,7 @@ public class DatabaseContext : DbContext
 
             mb.Property(u => u.Email).IsRequired();
 
-            mb.Property(u => u.RoleId).IsRequired();
+            //mb.Property(u => u.RoleId).IsRequired();
 
             // If u delete Role User alsow will be deleted.
             mb.HasOne(u => u.Role)

@@ -33,10 +33,8 @@ public class QuestionsRepository : IQuestionsRepository
     public async Task<Question> GetQuestionByIDAsync(int id)
     {
         return await context.Questions
-            .Include(q => q.Answers)
-                .ThenInclude(a => a.Ratings)
-            .Include(q => q.Answers)
-                .ThenInclude(a => a.Author)
+            .Include(q => q.Answers).ThenInclude(a => a.Ratings)
+            .Include(q => q.Answers).ThenInclude(a => a.Author)
             .Include(q => q.Ratings)
             .Include(q => q.Author)
             .FirstOrDefaultAsync(q => q.Id == id);
