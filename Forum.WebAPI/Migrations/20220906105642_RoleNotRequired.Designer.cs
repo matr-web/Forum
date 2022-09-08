@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Forum.WebAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20220830183841_UserIsNullable")]
-    partial class UserIsNullable
+    [Migration("20220906105642_RoleNotRequired")]
+    partial class RoleNotRequired
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -40,7 +40,9 @@ namespace Forum.WebAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getdate()");
 
                     b.Property<int>("QuestionId")
                         .HasColumnType("int");
@@ -70,7 +72,9 @@ namespace Forum.WebAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getdate()");
 
                     b.Property<string>("Topic")
                         .IsRequired()
@@ -152,8 +156,17 @@ namespace Forum.WebAPI.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("Last Name");
 
+                    b.Property<byte[]>("PasswordHash")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("PasswordSalt")
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

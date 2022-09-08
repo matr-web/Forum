@@ -23,12 +23,12 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddScoped<IAnswersRepository, AnswersRepository>();
 builder.Services.AddScoped<IQuestionsRepository, QuestionsRepository>();
-
 builder.Services.AddScoped<IAnswersService, AnswersService>();
 builder.Services.AddScoped<IQuestionsService, QuestionsService>();
-
 builder.Services.AddScoped<IRatingsRepository, RatingsRepository>();
 builder.Services.AddScoped<IRatingsService, RatingsService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
@@ -36,9 +36,9 @@ var app = builder.Build();
 using var scope = app.Services.CreateScope();
 var dbContext = scope.ServiceProvider.GetService<DatabaseContext>();
 SeedData.GenerateUsers(dbContext);
-SeedData.GenerateQuestions(dbContext);
-SeedData.GenerateAnswers(dbContext);
-SeedData.GenerateRatings(dbContext);
+//SeedData.GenerateQuestions(dbContext);
+//SeedData.GenerateAnswers(dbContext);
+//SeedData.GenerateRatings(dbContext);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

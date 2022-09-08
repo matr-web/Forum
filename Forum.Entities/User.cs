@@ -3,9 +3,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Forum.Entities;
 
-public class User 
+public class User
 {
     public Guid Id { get; set; }
+
+    public string Username { get; set; }
 
     public string FirstName { get; set; }
 
@@ -14,7 +16,9 @@ public class User
     [DataType(DataType.EmailAddress)]
     public string Email { get; set; }
 
-    public string Password { get; set; }
+    public byte[] PasswordHash { get; set; }
+
+    public byte[] PasswordSalt { get; set; }
 
     public int RoleId { get; set; }
     public virtual Role Role { get; set; }
@@ -24,6 +28,8 @@ public class User
     public virtual ICollection<Rating> Ratings { get; set; }
 
     [NotMapped]
-    public string ConfirmPassword { get; set; }
-    public string FullName => $"{FirstName} {LastName}";
+    public string Password { get; set; }
+
+    [NotMapped]
+    public string FullName => $"{FirstName} {LastName}"; 
 }

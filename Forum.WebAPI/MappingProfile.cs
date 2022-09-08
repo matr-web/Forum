@@ -24,5 +24,13 @@ public class MappingProfile : Profile
 
         CreateMap<CreateRatingDto, Rating>();
         CreateMap<UpdateRatingDto, Rating>();
+
+        CreateMap<UserDto, User>();
+
+        CreateMap<User, UserDto>()
+            .ForMember(aDto => aDto.Role, m => m.MapFrom(a => a.Role.Name)); 
+
+        CreateMap<RegisterUserDto, User>();
+        CreateMap<LoginUserDto, User>();
     }
 }

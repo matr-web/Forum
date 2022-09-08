@@ -51,7 +51,7 @@ namespace Forum.WebAPI.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("Answers", (string)null);
+                    b.ToTable("Answers");
                 });
 
             modelBuilder.Entity("Forum.Entities.Question", b =>
@@ -82,7 +82,7 @@ namespace Forum.WebAPI.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.ToTable("Questions", (string)null);
+                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("Forum.Entities.Rating", b =>
@@ -113,7 +113,7 @@ namespace Forum.WebAPI.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("Ratings", (string)null);
+                    b.ToTable("Ratings");
                 });
 
             modelBuilder.Entity("Forum.Entities.Role", b =>
@@ -129,7 +129,7 @@ namespace Forum.WebAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("Forum.Entities.User", b =>
@@ -154,17 +154,23 @@ namespace Forum.WebAPI.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("Last Name");
 
-                    b.Property<string>("Password")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte[]>("PasswordHash")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("PasswordSalt")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Forum.Entities.Answer", b =>
