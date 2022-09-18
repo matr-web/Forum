@@ -6,8 +6,8 @@ namespace Forum.WebAPI.Repositories;
 public interface IQuestionsRepository
 {
     Task<IEnumerable<Question>> GetQuestionsAsync();
-    Task<Question> GetQuestionByIDAsync(int questionId);
-    Task InsertQuestionAsync(Question question);
+    Task<Question> GetQuestionByIdAsync(int questionId);
+    Task InsertQuestionAsync(Question question, string authorId);
     Task DeleteQuestionAsync(int questionId);
     Task UpdateQuestionAsync(Question question);
     Task SaveAsync();
@@ -30,7 +30,7 @@ public class QuestionsRepository : IQuestionsRepository
             .ToListAsync();
     }
 
-    public async Task<Question> GetQuestionByIDAsync(int id)
+    public async Task<Question> GetQuestionByIdAsync(int id)
     {
         return await context.Questions
             .Include(q => q.Answers).ThenInclude(a => a.Ratings)
@@ -40,7 +40,7 @@ public class QuestionsRepository : IQuestionsRepository
             .FirstOrDefaultAsync(q => q.Id == id);
     }
 
-    public async Task InsertQuestionAsync(Question question)
+    public async Task InsertQuestionAsync(Question question, string authorId)
     {
         await context.Questions.AddAsync(question);
     }
@@ -56,9 +56,9 @@ public class QuestionsRepository : IQuestionsRepository
         context.Questions.Remove(question);
     }
 
-    public async Task UpdateQuestionAsync(Question question)
+    public Task UpdateQuestionAsync(Question question)
     {
-        await Task.FromResult(context.Entry(question).State = EntityState.Modified);
+        return Task.FromResult(context.Entry(question).State = EntityState.Modified);
     }
 
     public async Task SaveAsync()

@@ -3,12 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
+using System.Linq.Expressions;
 
 namespace Forum.WebAPI.Repositories;
 
 public interface IUserRepository
 {
-    Task<User> GetUserByNameAsync(string username);
+    User GetUser(Expression<Func<User, bool>> predicate);
     Task InsertUserAsync(User user);
     Task DeleteUserAsync(Guid userId);
     string CreateToken(User user);
@@ -26,11 +27,12 @@ public class UserRepository : IUserRepository
         this.configuration = configuration;
     }
 
-    public async Task<User> GetUserByNameAsync(string username)
+    public User GetUser(Expression<Func<User, bool>> predicate)
     {
-        return await context.Users
+        return context.Users
             .Include(u => u.Role)
-            .FirstOrDefaultAsync(u => u.Username == username);
+            .Where(predicate)
+            .FirstOrDefault();
     }
 
     public async Task InsertUserAsync(User user)
@@ -55,7 +57,8 @@ public class UserRepository : IUserRepository
             {
             new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role.Name)
+                new Claim(ClaimTypes.Role, user.Role.Name),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
 
         var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(

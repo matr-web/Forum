@@ -1,6 +1,8 @@
 ﻿using Forum.WebAPI.Dto_s;
 using Forum.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Forum.WebAPI.Controllers;
 
@@ -15,6 +17,7 @@ public class RatingsController : ControllerBase
         this.ratingsService = ratingsService;
     }
 
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RatingDto>>> GetAsync()
     {
@@ -28,30 +31,11 @@ public class RatingsController : ControllerBase
         return Ok(ratingDtos);
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] CreateRatingDto createRatingDto)
     {
-        int ratingId = await ratingsService.InsertRatingAsync(createRatingDto);
-
-        return Created($"api/ratings/{ratingId}", null);
-    }
-
-    [HttpPut("{id}")]
-    public async Task<ActionResult> PutAsync(int id, [FromBody] UpdateRatingDto updateRatingDto)
-    {
-        if (id == updateRatingDto.Id)
-        {
-            await ratingsService.UpdateRatingAsync(updateRatingDto);
-            return Ok(updateRatingDto);
-        }
-
-        return NotFound();
-    }
-
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteAsync(int id)
-    {
-        await ratingsService.DeleteRatingAsync(id);
+        await ratingsService.InsertRatingAsync(createRatingDto, User.FindFirstValue(ClaimTypes.NameIdentifier));
 
         return Ok();
     }

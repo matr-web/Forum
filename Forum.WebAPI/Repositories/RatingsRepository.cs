@@ -1,12 +1,13 @@
 ﻿using Forum.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Forum.WebAPI.Repositories;
 
 public interface IRatingsRepository 
 {
     Task<IEnumerable<Rating>> GetRatingsAsync();
-    Task<Rating> GetRatingByIDAsync(int ratingId);
+    IQueryable<Rating> GetRatings(Expression<Func<Rating, bool>> predicate);
     Task InsertRatingAsync(Rating rating);
     Task DeleteRatingAsync(int ratingId);
     Task UpdateRatingAsync(Rating rating);
@@ -27,9 +28,9 @@ public class RatingsRepository : IRatingsRepository
         return await context.Ratings.ToListAsync();
     }
 
-    public async Task<Rating> GetRatingByIDAsync(int id)
+    public IQueryable<Rating> GetRatings(Expression<Func<Rating, bool>> predicate)
     {
-        return await context.Ratings.FindAsync(id);
+        return context.Ratings.Where(predicate);
     }
 
     public async Task InsertRatingAsync(Rating rating)
@@ -37,15 +38,15 @@ public class RatingsRepository : IRatingsRepository
         await context.Ratings.AddAsync(rating);
     }
 
-    public async Task DeleteRatingAsync(int ratingID)
+    public async Task DeleteRatingAsync(int ratingId)
     {
-        Rating rating = await context.Ratings.FindAsync(ratingID);
+        Rating rating = await context.Ratings.FindAsync(ratingId);
         context.Ratings.Remove(rating);
     }
 
-    public async Task UpdateRatingAsync(Rating rating)
+    public Task UpdateRatingAsync(Rating rating)
     {
-        await Task.FromResult(context.Entry(rating).State = EntityState.Modified);
+        return Task.FromResult(context.Entry(rating).State = EntityState.Modified);
     }
 
     public async Task SaveAsync()

@@ -18,6 +18,11 @@ public class AuthController : ControllerBase
     [HttpPost("Register")]
     public async Task<ActionResult<UserDto>> RegisterAsync(RegisterUserDto registerUserDto)
     {
+        if (!registerUserDto.Password.Equals(registerUserDto.ConfirmPassword))
+        {
+            return BadRequest("Wrong Password.");
+        }
+
         UserDto userDto = await userService.RegisterUserAsync(registerUserDto);
 
         return Ok(userDto);
@@ -27,7 +32,7 @@ public class AuthController : ControllerBase
     [HttpPost("Login")]
     public async Task<ActionResult<string>> LoginAsync(LoginUserDto loginUserDto)
     {
-        if (await userService.VerifyUserData(loginUserDto) is false)
+        if (userService.VerifyUserData(loginUserDto) is false)
         {
             return BadRequest("Wrong Username or Password.");
         }
