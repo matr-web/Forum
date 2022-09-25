@@ -90,6 +90,17 @@ SeedData.GenerateQuestions(dbContext);
 SeedData.GenerateAnswers(dbContext);
 SeedData.GenerateRatings(dbContext);
 
+// Add CORS.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontEndClient", policyBuilder =>
+    policyBuilder.AllowAnyMethod()
+    .AllowAnyHeader()
+    .WithOrigins(builder.Configuration["AllowedOrigins"]));
+});
+
+app.UseCors("FrontEndClient");
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
