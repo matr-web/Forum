@@ -23,6 +23,8 @@ public class AuthController : ControllerBase
             return BadRequest("Wrong Password.");
         }
 
+        var a = nameof(registerUserDto.Password);
+
         UserDto userDto = await userService.RegisterUserAsync(registerUserDto);
 
         return Ok(userDto);
