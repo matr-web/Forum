@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Forum.Entities;
+using Forum.WebAPI.Authorization;
 using Forum.WebAPI.Dto_s;
 using Forum.WebAPI.Repositories;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Forum.WebAPI.Services;
 
@@ -9,9 +11,9 @@ public interface IAnswersService
 {
     Task<IEnumerable<AnswerDto>> GetAnswersAsync();
     Task<AnswerDto> GetAnswerByIdAsync(int id);
-    Task<int> InsertAnswerAsync(int questionId, CreateAnswerDto createAnswerDto, string authorId);
-    Task<bool> DeleteAnswerAsync(int id, string authorId);
-    Task<bool> UpdateAnswerAsync(UpdateAnswerDto updateAnswerDto, string authorId);
+    Task<int> InsertAnswerAsync(int questionId, CreateAnswerDto createAnswerDto);
+    Task UpdateAnswerAsync(UpdateAnswerDto updateAnswerDto);
+    Task DeleteAnswerAsync(int id);
 }
 
 public class AnswersService : IAnswersService
@@ -19,23 +21,32 @@ public class AnswersService : IAnswersService
     private readonly IAnswersRepository answersRepository;
     private readonly IUserRepository userRepository;
     private readonly IMapper mapper;
+    private readonly IUserService userService;
+    private readonly IAuthorizationService authorizationService;
 
-    public AnswersService(IAnswersRepository answerRepository, IUserRepository userRepository, IMapper mapper)
+    public AnswersService(IAnswersRepository answersRepository, IUserRepository userRepository, IMapper mapper, IUserService userService,
+            IAuthorizationService authorizationService)
     {
-        this.answersRepository = answerRepository;
+        this.answersRepository = answersRepository;
         this.userRepository = userRepository;
         this.mapper = mapper;
+        this.userService = userService;
+        this.authorizationService = authorizationService;
     }
 
     public async Task<IEnumerable<AnswerDto>> GetAnswersAsync() => mapper.Map<IEnumerable<AnswerDto>>(await answersRepository.GetAnswersAsync());
     
     public async Task<AnswerDto> GetAnswerByIdAsync(int id) => mapper.Map<AnswerDto>(await answersRepository.GetAnswerByIdAsync(id));
 
-    public async Task<int> InsertAnswerAsync(int questionId, CreateAnswerDto createAnswerDto, string authorId)
+    public async Task<int> InsertAnswerAsync(int questionId, CreateAnswerDto createAnswerDto)
     {
         Answer answer = mapper.Map<Answer>(createAnswerDto);
 
-        User user = userRepository.GetUser(u => u.Id == new Guid(authorId));
+        if (answer is null) throw new Exception(StatusCodes.Status404NotFound.ToString());
+        
+        User user = userRepository.GetUser(u => u.Id == userService.UserId);
+
+        if (user is null) throw new Exception(StatusCodes.Status404NotFound.ToString());
 
         answer.Author = user;
         answer.QuestionId = questionId;
@@ -46,40 +57,36 @@ public class AnswersService : IAnswersService
         return answer.Id;
     }
 
-    public async Task<bool> UpdateAnswerAsync(UpdateAnswerDto updateAnswerDto, string authorId)
+    public async Task UpdateAnswerAsync(UpdateAnswerDto updateAnswerDto)
     {
         Answer answer = await answersRepository.GetAnswerByIdAsync(updateAnswerDto.Id);
 
-        User user = userRepository.GetUser(u => u.Id == new Guid(authorId));
+        if (answer is null) throw new Exception(StatusCodes.Status404NotFound.ToString());
 
-        if(answer.AuthorId.ToString().Equals(authorId))
-        {
+        var authorizationResult = authorizationService.AuthorizeAsync(userService.User, new Resource(answer),
+                new ResourceOperationRequirement(ResourceOperation.Update)).Result;
+
+        if (!authorizationResult.Succeeded) throw new Exception(StatusCodes.Status403Forbidden.ToString()); 
+
             answer.Content = updateAnswerDto.Content;
             answer.Date = DateTime.Now;
 
             await answersRepository.UpdateAnswerAsync(answer);
             await answersRepository.SaveAsync();
-
-            return true;
-        }
-
-        return false;
     }
 
-    public async Task<bool> DeleteAnswerAsync(int id, string authorId)
+    public async Task DeleteAnswerAsync(int id)
     {
         Answer answer = await answersRepository.GetAnswerByIdAsync(id);
 
-        User user = userRepository.GetUser(u => u.Id == new Guid(authorId));
+        if (answer is null) throw new Exception(StatusCodes.Status404NotFound.ToString());
 
-        if (answer.AuthorId.ToString().Equals(authorId) || user.RoleId == 1)
-        {
+        var authorizationResult = authorizationService.AuthorizeAsync(userService.User, new Resource(answer),
+           new ResourceOperationRequirement(ResourceOperation.Update)).Result;
+
+        if (!authorizationResult.Succeeded) throw new Exception(StatusCodes.Status403Forbidden.ToString());
+
             await answersRepository.DeleteAnswerAsync(id);
             await answersRepository.SaveAsync();
-
-            return true;
-        }
-
-        return false;
     }
 }

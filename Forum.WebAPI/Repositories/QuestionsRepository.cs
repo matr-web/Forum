@@ -1,13 +1,15 @@
 ﻿using Forum.Entities;
+using Forum.WebAPI.Dto_s;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Forum.WebAPI.Repositories;
 
 public interface IQuestionsRepository
 {
-    Task<IEnumerable<Question>> GetQuestionsAsync();
+    Task<Dictionary<int, IEnumerable<Question>>> GetQuestionsAsync(Query query);
     Task<Question> GetQuestionByIdAsync(int questionId);
-    Task InsertQuestionAsync(Question question, string authorId);
+    Task InsertQuestionAsync(Question question);
     Task DeleteQuestionAsync(int questionId);
     Task UpdateQuestionAsync(Question question);
     Task SaveAsync();
@@ -22,12 +24,38 @@ public class QuestionsRepository : IQuestionsRepository
         this.context = context;
     }
 
-    public async Task<IEnumerable<Question>> GetQuestionsAsync()
+    public Task<Dictionary<int, IEnumerable<Question>>> GetQuestionsAsync(Query query)
     {
-        return await context.Questions
+        IQueryable<Question> baseQuery = context.Questions
             .Include(q => q.Ratings)
             .Include(q => q.Author)
-            .ToListAsync();
+            .Where(q => query.SearchPhrase == null 
+            || q.Topic.ToLower().Contains(query.SearchPhrase.ToLower())
+            || q.Content.ToLower().Contains(query.SearchPhrase.ToLower()));
+
+        if(!string.IsNullOrEmpty(query.SortBy))
+        {
+            var columnSelector = new Dictionary<string, Expression<Func<Question, object>>>
+            {
+                { nameof(Question.Topic), q => q.Topic },
+                { nameof(Question.Date), q => q.Date },
+            };
+
+            baseQuery = query.SortOrder == SortOrder.ASC ?
+                baseQuery.OrderBy(columnSelector[query.SortBy])
+                : baseQuery.OrderByDescending(columnSelector[query.SortBy]);
+        }
+
+        IQueryable<Question> queryResult = baseQuery
+            .Skip(query.PageSize * (query.PageNumber - 1))
+            .Take(query.PageSize);
+
+        Dictionary<int, IEnumerable<Question>> openWith = new Dictionary<int, IEnumerable<Question>>();
+
+        openWith.Add(1, baseQuery.AsEnumerable());
+        openWith.Add(2, queryResult.AsEnumerable());
+
+        return Task.FromResult(openWith);
     }
 
     public async Task<Question> GetQuestionByIdAsync(int id)
@@ -40,7 +68,7 @@ public class QuestionsRepository : IQuestionsRepository
             .FirstOrDefaultAsync(q => q.Id == id);
     }
 
-    public async Task InsertQuestionAsync(Question question, string authorId)
+    public async Task InsertQuestionAsync(Question question)
     {
         await context.Questions.AddAsync(question);
     }

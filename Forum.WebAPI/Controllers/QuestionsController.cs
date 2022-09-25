@@ -1,8 +1,8 @@
 ﻿using Forum.WebAPI.Dto_s;
+using Forum.WebAPI.Pagination;
 using Forum.WebAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Forum.WebAPI.Controllers;
 
@@ -19,16 +19,16 @@ public class QuestionsController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<QuestionDto>>> GetAsync()
+    public async Task<ActionResult<IEnumerable<QuestionDto>>> GetAsync([FromQuery] Query query)
     {
-        IEnumerable<QuestionDto> questionsDtos = await questionsService.GetQuestionsAsync();
+        PagedResult<QuestionDto> pagedQuestionsDtos = await questionsService.GetQuestionsAsync(query);
 
-        if (questionsDtos is null || questionsDtos.Count() == 0)
+        if (pagedQuestionsDtos is null || pagedQuestionsDtos.Items is null || pagedQuestionsDtos.Items.Count() == 0)
         {
-            return NotFound(questionsDtos);
+            return NotFound(pagedQuestionsDtos);
         }
 
-        return Ok(questionsDtos);
+        return Ok(pagedQuestionsDtos);
     }
 
     [AllowAnonymous]
@@ -49,7 +49,7 @@ public class QuestionsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] CreateQuestionDto createQuestionDto)
     {
-        int questionId = await questionsService.InsertQuestionAsync(createQuestionDto, User.FindFirstValue(ClaimTypes.NameIdentifier));
+        int questionId = await questionsService.InsertQuestionAsync(createQuestionDto);
 
         return Created($"api/questions/{questionId}", null);
     }
@@ -58,26 +58,22 @@ public class QuestionsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] UpdateQuestionDto updateQuestionDto)
     {
-        if (id == updateQuestionDto.Id)
+        if (id != updateQuestionDto.Id)
         {
-            bool updated = await questionsService.UpdateQuestionAsync(updateQuestionDto, User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-            if(updated) return Ok(updateQuestionDto);
-
-            return Unauthorized();
+            return NotFound();
         }
 
-        return NotFound();
+        await questionsService.UpdateQuestionAsync(updateQuestionDto);
+
+        return Ok(updateQuestionDto);
     }
 
     [Authorize]
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        bool deleted = await questionsService.DeleteQuestionAsync(id, User.FindFirstValue(ClaimTypes.NameIdentifier));
+       await questionsService.DeleteQuestionAsync(id);
 
-        if(deleted) return Ok();
-
-        return Unauthorized();
+       return Ok();
     }
 }
