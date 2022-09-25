@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Forum.WebAPI.Controllers;
 
-[Route("[controller]")]
 [ApiController]
+[Route("[controller]")]
 public class AuthController : ControllerBase
 {
     private readonly IUserService userService;

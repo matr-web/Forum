@@ -35,7 +35,7 @@ public class RatingsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] CreateRatingDto createRatingDto)
     {
-        await ratingsService.InsertRatingAsync(createRatingDto, User.FindFirstValue(ClaimTypes.NameIdentifier));
+        await ratingsService.InsertRatingAsync(createRatingDto);
 
         return Ok();
     }

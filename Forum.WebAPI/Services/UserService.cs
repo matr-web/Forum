@@ -4,12 +4,15 @@ using Forum.WebAPI.Dto_s;
 using Forum.WebAPI.Repositories;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Security.Claims;
 using System.Security.Cryptography;
 
 namespace Forum.WebAPI.Services;
 
 public interface IUserService
 {
+    ClaimsPrincipal User { get; }
+    Guid? UserId { get; }
     Task<UserDto> RegisterUserAsync(RegisterUserDto registerUserDto);
     Task<string> LoginUserAsync(LoginUserDto loginUserDto);
     bool VerifyUserData(LoginUserDto loginUserDto);
@@ -19,13 +22,19 @@ public class UserService : IUserService
 {
     private readonly IUserRepository userRepository;
     private readonly IMapper mapper;
+    private readonly IHttpContextAccessor httpContextAccessor;
 
-    public UserService(IUserRepository userRepository, IMapper mapper)
+    public UserService(IUserRepository userRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor)
     {
         this.userRepository = userRepository;
         this.mapper = mapper;
+        this.httpContextAccessor = httpContextAccessor;
     }
 
+    public ClaimsPrincipal User => httpContextAccessor.HttpContext?.User;
+
+    public Guid? UserId => User is null ? null : Guid.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value);
+       
     public Task<string> LoginUserAsync(LoginUserDto loginUserDto)
     {
         User user = userRepository.GetUser(u => u.Username == loginUserDto.Username);
@@ -54,7 +63,7 @@ public class UserService : IUserService
 
             if (sqlException.Number == 2601 || sqlException.Number == 2627)
             {
-                throw new DuplicateNameException("User with given Email already exists.");
+                throw new DuplicateNameException("User with given Email or Username already exists.");
             }
             else
             {

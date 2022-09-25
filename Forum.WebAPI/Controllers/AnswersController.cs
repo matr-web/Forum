@@ -50,7 +50,7 @@ public class AnswersController : ControllerBase
     [HttpPost("{qestionId}")]
     public async Task<ActionResult> PostAsync(int qestionId, [FromBody] CreateAnswerDto creatAnswerDto)
     {
-        int answerId = await answersService.InsertAnswerAsync(qestionId, creatAnswerDto, User.FindFirstValue(ClaimTypes.NameIdentifier));
+        int answerId = await answersService.InsertAnswerAsync(qestionId, creatAnswerDto);
 
         return Created($"api/answers/{answerId}", null);
     }
@@ -59,26 +59,21 @@ public class AnswersController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult> PutAsync(int id, [FromBody] UpdateAnswerDto updateAnswerDto)
     {
-        if (id == updateAnswerDto.Id)
+        if (id != updateAnswerDto.Id)
         {
-            bool updated = await answersService.UpdateAnswerAsync(updateAnswerDto, User.FindFirstValue(ClaimTypes.NameIdentifier));
-           
-            if(updated) return Ok(updateAnswerDto);
-
-            return Unauthorized();
+            return NotFound();
         }
+        await answersService.UpdateAnswerAsync(updateAnswerDto);
 
-        return NotFound();
+        return Ok(updateAnswerDto);
     }
 
     [Authorize]
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        bool deleted = await answersService.DeleteAnswerAsync(id, User.FindFirstValue(ClaimTypes.NameIdentifier));
+        await answersService.DeleteAnswerAsync(id);
 
-        if(deleted) return Ok();
-
-        return Unauthorized();
+        return Ok();
     }   
 }

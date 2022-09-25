@@ -38,8 +38,12 @@ public class DatabaseContext : DbContext
             mb.Property(u => u.LastName).HasColumnName("Last Name");
             mb.Property(u => u.LastName).HasMaxLength(50);
 
+            mb.Property(u => u.Username).IsRequired();
+            mb.HasIndex(u => u.Username).IsUnique();
+
             mb.Property(u => u.Email).IsRequired();
             mb.HasIndex(u => u.Email).IsUnique();
+
             mb.Property(u => u.RoleId).IsRequired();
 
             // If u delete Role User alsow will be deleted.

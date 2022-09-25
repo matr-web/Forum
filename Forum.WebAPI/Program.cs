@@ -1,7 +1,13 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Forum.WebAPI;
+using Forum.WebAPI.Authorization;
+using Forum.WebAPI.Dto_s;
+using Forum.WebAPI.Pagination;
 using Forum.WebAPI.Repositories;
 using Forum.WebAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -15,6 +21,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers().AddJsonOptions(x =>
                 x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
+// Add FluentValidation.
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -48,6 +58,13 @@ builder.Services.AddScoped<IRatingsRepository, RatingsRepository>();
 builder.Services.AddScoped<IRatingsService, RatingsService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddHttpContextAccessor();
+
+// Register Validators.
+builder.Services.AddScoped<IValidator<Query>, QueryValidator>();
+
+// Register Authorization Handlers.
+builder.Services.AddScoped<IAuthorizationHandler, ResourceOperationRequirementHandler>();
 
 // Configure Authentication.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

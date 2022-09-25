@@ -8,7 +8,7 @@ namespace Forum.WebAPI.Services
     public interface IRatingsService
     {
         Task<IEnumerable<RatingDto>> GetRatingsAsync();
-        Task InsertRatingAsync(CreateRatingDto createRatingDto, string authorId);
+        Task InsertRatingAsync(CreateRatingDto createRatingDto);
     }
 
     public class RatingsService : IRatingsService
@@ -16,32 +16,34 @@ namespace Forum.WebAPI.Services
         private readonly IRatingsRepository ratingsRepository;
         private readonly IUserRepository userRepository;
         private readonly IMapper mapper;
+        private readonly IUserService userService;
 
-        public RatingsService(IRatingsRepository ratingsRepository, IUserRepository userRepository, IMapper mapper)
+        public RatingsService(IRatingsRepository ratingsRepository, IUserRepository userRepository, IMapper mapper, IUserService userService)
         {
             this.ratingsRepository = ratingsRepository;
             this.userRepository = userRepository;
             this.mapper = mapper;
+            this.userService = userService;
         }
 
         public async Task<IEnumerable<RatingDto>> GetRatingsAsync() => mapper.Map<IEnumerable<RatingDto>>(await ratingsRepository.GetRatingsAsync());
 
-        public async Task InsertRatingAsync(CreateRatingDto createRatingDto, string authorId)
+        public async Task InsertRatingAsync(CreateRatingDto createRatingDto)
         {
-            User user = userRepository.GetUser(u => u.Id == new Guid(authorId));
+            User user = userRepository.GetUser(u => u.Id == userService.UserId);
 
             IQueryable<Rating> userRatings = ratingsRepository.GetRatings(r => r.AuthorId == user.Id);
 
-            // Check if User has already any Rating for given Question/Answer if yes update it.
+            // Check if User has already any Rating for given Question if yes update it.
             if(createRatingDto.QuestionId is not null && userRatings.Any(r => r.QuestionId == createRatingDto.QuestionId))
             {
-                Rating rating = userRatings.FirstOrDefault(r => r.QuestionId == createRatingDto.QuestionId);
+                Rating rating = userRatings.FirstOrDefault(r => r.QuestionId == createRatingDto.QuestionId); // Get the Rating.
 
                 if (rating.Value.Equals(createRatingDto.Value)) await DeleteRatingAsync(rating.Id); // If u choose the same Value it gets deleted.
 
-                else await UpdateRatingAsync(rating, createRatingDto); // If u choose another Value updated it.
-            }
-            else if (createRatingDto.AnswerId is not null && userRatings.Any(r => r.AnswerId == createRatingDto.AnswerId))
+                else await UpdateRatingAsync(rating, createRatingDto); // If u choose another Value it gets updated.
+            } 
+            else if (createRatingDto.AnswerId is not null && userRatings.Any(r => r.AnswerId == createRatingDto.AnswerId)) // Same for Answer.
             {
                 Rating rating = userRatings.FirstOrDefault(r => r.AnswerId == createRatingDto.AnswerId);
 
@@ -49,7 +51,7 @@ namespace Forum.WebAPI.Services
 
                 else await UpdateRatingAsync(rating, createRatingDto);
             }
-            else // If not create new Rating.
+            else // If User doesn't have any Ratings, create new Rating.
             {
                 Rating rating = mapper.Map<Rating>(createRatingDto);
 
