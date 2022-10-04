@@ -19,8 +19,8 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers().AddJsonOptions(x =>
-                x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+builder.Services.AddControllers().AddJsonOptions(options =>
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 // Add FluentValidation.
 builder.Services.AddFluentValidationAutoValidation();
@@ -80,6 +80,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// Add CORS.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontEndClient", policyBuilder =>
+    policyBuilder.AllowAnyMethod()
+    .AllowAnyHeader()
+    .WithOrigins(builder.Configuration["AllowedOrigins"]));
+});
+
 var app = builder.Build();
 
 // Seed Data.
@@ -89,15 +98,6 @@ SeedData.GenerateUsers(dbContext);
 SeedData.GenerateQuestions(dbContext);
 SeedData.GenerateAnswers(dbContext);
 SeedData.GenerateRatings(dbContext);
-
-// Add CORS.
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("FrontEndClient", policyBuilder =>
-    policyBuilder.AllowAnyMethod()
-    .AllowAnyHeader()
-    .WithOrigins(builder.Configuration["AllowedOrigins"]));
-});
 
 app.UseCors("FrontEndClient");
 
