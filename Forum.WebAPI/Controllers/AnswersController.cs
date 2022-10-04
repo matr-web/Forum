@@ -2,8 +2,6 @@
 using Forum.WebAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
 
 namespace Forum.WebAPI.Controllers;
 
