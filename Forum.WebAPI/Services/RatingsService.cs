@@ -7,7 +7,6 @@ namespace Forum.WebAPI.Services
 {
     public interface IRatingsService
     {
-        Task<IEnumerable<RatingDto>> GetRatingsAsync();
         Task InsertRatingAsync(CreateRatingDto createRatingDto);
     }
 
@@ -25,8 +24,6 @@ namespace Forum.WebAPI.Services
             this.mapper = mapper;
             this.userService = userService;
         }
-
-        public async Task<IEnumerable<RatingDto>> GetRatingsAsync() => mapper.Map<IEnumerable<RatingDto>>(await ratingsRepository.GetRatingsAsync());
 
         public async Task InsertRatingAsync(CreateRatingDto createRatingDto)
         {
