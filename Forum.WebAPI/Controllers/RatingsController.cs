@@ -16,20 +16,6 @@ public class RatingsController : ControllerBase
         this.ratingsService = ratingsService;
     }
 
-    [AllowAnonymous]
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<RatingDto>>> GetAsync()
-    {
-        IEnumerable<RatingDto> ratingDtos = await ratingsService.GetRatingsAsync();
-
-        if (ratingDtos is null || ratingDtos.Count() == 0)
-        {
-            return NotFound(ratingDtos);
-        }
-
-        return Ok(ratingDtos);
-    }
-
     [Authorize]
     [HttpPost]
     public async Task<ActionResult> PostAsync([FromBody] CreateRatingDto createRatingDto)
