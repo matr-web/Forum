@@ -43,7 +43,7 @@ public class UserRepository : IUserRepository
     public async Task DeleteUserAsync(Guid userId)
     {
         User user = await context.Users.FindAsync(userId);
-        await Task.FromResult(context.Users.Update(user));
+        await Task.FromResult(context.Users.Remove(user));
     }
 
     public async Task SaveAsync()
