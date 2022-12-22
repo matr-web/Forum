@@ -62,7 +62,7 @@ namespace Forum.WebAPI.Services
 
             User user = userRepository.GetUser(u => u.Id == userService.UserId);
 
-            if (user is null) throw new Exception(StatusCodes.Status404NotFound.ToString());
+            if (user is null) throw new Exception(StatusCodes.Status401Unauthorized.ToString());
 
             question.Author = user;
 

@@ -59,8 +59,8 @@ public class QuestionsController : ControllerBase
         {
             if (ex.Message == "400")
                 return BadRequest();
-            else if (ex.Message == "404")
-                return NotFound();
+            else if (ex.Message == "401")
+                return Unauthorized();
             else
                 throw;
         }

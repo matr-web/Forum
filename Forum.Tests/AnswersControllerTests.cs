@@ -7,26 +7,26 @@ using Microsoft.AspNetCore.Mvc.Testing;
 namespace Forum.Tests;
 
 /// <summary>
-/// Tests for Questions Controller. 
+/// Tests for Answers Controller. 
 /// Tests work fine with current local db state.
 /// </summary>
-public class QuestionsControllerTests
+public class AnswersControllerTests
 {
     private HttpClient _client_Admin;
     private HttpClient _client_User;
 
-    public QuestionsControllerTests()
+    public AnswersControllerTests()
     {
         _client_Admin = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                services.AddSingleton<IPolicyEvaluator, FakePolicyEvaluator>();
+           .WithWebHostBuilder(builder =>
+           {
+               builder.ConfigureServices(services =>
+               {
+                   services.AddSingleton<IPolicyEvaluator, FakePolicyEvaluator>();
 
-                services.AddMvc(option => option.Filters.Add(new FakeUserWithAdministratorPermissionsFilter()));
-            });
-        }).CreateClient();
+                   services.AddMvc(option => option.Filters.Add(new FakeUserWithAdministratorPermissionsFilter()));
+               });
+           }).CreateClient();
 
         _client_User = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
@@ -41,42 +41,25 @@ public class QuestionsControllerTests
     }
 
     #region GetAll
-    [Theory]
-    [InlineData("PageNumber=1&PageSize=15&SortBy=Topic&SortOrder=0")]
-    [InlineData("PageNumber=1&PageSize=10&SortBy=Topic&SortOrder=1")]
-    [InlineData("PageNumber=1&PageSize=5&SortBy=Topic&SortOrder=0")]
-    [InlineData("PageNumber=1&PageSize=5&SortBy=Date&SortOrder=0")]
-    public async Task GetAll_WithQueryParameters_ReturnsOkResult(string queryParameters)
+    [Fact]
+    public async Task GetAll_ReturnsOkResult()
     {
         // Act
-        var response = await _client_User.GetAsync("/Questions/GetAll?" + queryParameters);
+        var response = await _client_User.GetAsync("/Answers/GetAll");
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
-    }
-
-    [Theory]
-    [InlineData("PageNumber=1&PageSize=4&SortBy=Topic&SortOrder=0")]
-    [InlineData("PageNumber=1&PageSize=10&SortBy=Question&SortOrder=1")]
-    [InlineData("PageNumber=1&PageSize=5&SortBy=Topic&SortOrder=2")]
-    public async Task GetAll_WithQueryParameters_ReturnsBadRequestResult(string queryParameters)
-    {
-        // Act
-        var response = await _client_User.GetAsync("/Questions/GetAll?" + queryParameters);
-
-        // Assert
-        response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
     }
     #endregion
 
     #region Get
     [Theory]
-    [InlineData(3)]
-    [InlineData(2)]
+    [InlineData(4)]
+    [InlineData(5)]
     public async Task Get_WithQueryParameters_ReturnsOkResult(int id)
     {
         // Act
-        var response = await _client_User.GetAsync("/Questions/Get/" + id);
+        var response = await _client_User.GetAsync("/Answers/Get/" + id);
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
@@ -88,7 +71,7 @@ public class QuestionsControllerTests
     public async Task Get_WithInvalidQueryParameters_ReturnsNotFoundResult(int id)
     {
         // Act
-        var response = await _client_User.GetAsync("/Questions/Get/" + id);
+        var response = await _client_User.GetAsync("/Answers/Get/" + id);
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.NotFound);
@@ -96,52 +79,55 @@ public class QuestionsControllerTests
     #endregion
 
     #region Create
-    [Fact]
-    public async Task CreateQuestion_WithValidModel_ReturnsCreatedStatus()
+    [Theory]
+    [InlineData(5)]
+    [InlineData(6)]
+    public async Task CreateAnswer_WithValidModel_ReturnsCreatedStatus(int questionId)
     {
         // Arrange
-        var model = new CreateQuestionDto()
+        var model = new CreateAnswerDto()
         {
-            Topic = "Test",
             Content = "Test Content"
         };
 
         var httpContent = model.ToJsonHttpContent();
 
         // Act
-        var response = await _client_User.PostAsync("/Questions", httpContent);
+        var response = await _client_User.PostAsync("/Answers/" + questionId, httpContent);
 
         // Assert 
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.Created);
         response.Headers.Location.Should().NotBeNull();
     }
 
-    [Fact]
-    public async Task CreateQuestion_WithInvalidModel_ReturnsBadRequestStatus()
+    [Theory]
+    [InlineData(5)]
+    [InlineData(6)]
+    public async Task CreateAnswer_WithInvalidModel_ReturnsBadRequestStatus(int questionId)
     {
         // Arrange
-        var model = new CreateQuestionDto()
+        var model = new CreateAnswerDto()
         {
-            Topic = null,
-            Content = "Test Content"
+            Content = null
         };
 
         var httpContent = model.ToJsonHttpContent();
 
         // Act
-        var response = await _client_User.PostAsync("/Questions", httpContent);
+        var response = await _client_User.PostAsync("/Answers/" + questionId, httpContent);
 
         // Assert 
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
     }
 
-    [Fact]
-    public async Task CreateQuestion_WithInvalidClient_ReturnsUnauthorizedStatus()
+    [Theory]
+    [InlineData(5)]
+    [InlineData(6)]
+    public async Task CreateAnswer_WithInvalidClient_ReturnsUnauthorizedStatus(int questionId)
     {
         // Arrange
-        var model = new CreateQuestionDto()
+        var model = new CreateAnswerDto()
         {
-            Topic = null,
             Content = "Test Content"
         };
 
@@ -150,7 +136,7 @@ public class QuestionsControllerTests
         var httpContent = model.ToJsonHttpContent();
 
         // Act
-        var response = await _client.PostAsync("/Questions", httpContent);
+        var response = await _client.PostAsync("/Answers/" + questionId, httpContent);
 
         // Assert 
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);
@@ -161,20 +147,19 @@ public class QuestionsControllerTests
     [Theory]
     [InlineData(43)]
     [InlineData(44)]
-    public async Task PutQuestion_WithValidModel_ReturnsOkStatus(int id)
+    public async Task PutAnswer_WithValidModel_ReturnsOkStatus(int id)
     {
         // Arrange
-        var model = new UpdateQuestionDto()
+        var model = new UpdateAnswerDto()
         {
             Id = id,
-            Topic = "Test",
             Content = "Test Content"
         };
 
         var httpContent = model.ToJsonHttpContent();
 
         // Act
-        var response = await _client_Admin.PutAsync("/Questions/" + id, httpContent);
+        var response = await _client_Admin.PutAsync("/Answers/" + id, httpContent);
 
         // Assert 
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
@@ -186,17 +171,16 @@ public class QuestionsControllerTests
     public async Task PutQuestion_WithValidModelButInvalidRequest_ReturnsNotFoundStatus(int id)
     {
         // Arrange
-        var model = new UpdateQuestionDto()
+        var model = new UpdateAnswerDto()
         {
             Id = id,
-            Topic = "Test",
             Content = "Test Content"
         };
 
         var httpContent = model.ToJsonHttpContent();
 
         // Act
-        var response = await _client_Admin.PutAsync("/Questions/" + id + 1, httpContent);
+        var response = await _client_Admin.PutAsync("/Answers/" + id + 1, httpContent);
 
         // Assert 
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.NotFound);
@@ -205,42 +189,40 @@ public class QuestionsControllerTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public async Task PutQuestion_WithValidModelThatDoesntExist_ReturnsNotFoundStatus(int id)
+    public async Task PutAnswer_WithValidModelThatDoesntExist_ReturnsNotFoundStatus(int id)
     {
         // Arrange
-        var model = new UpdateQuestionDto()
+        var model = new UpdateAnswerDto()
         {
             Id = id,
-            Topic = "Test",
             Content = "Test Content"
         };
 
         var httpContent = model.ToJsonHttpContent();
 
         // Act
-        var response = await _client_Admin.PutAsync("/Questions/" + id, httpContent);
+        var response = await _client_Admin.PutAsync("/Answers/" + id, httpContent);
 
         // Assert 
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.NotFound);
     }
 
     [Theory]
-    [InlineData(3)]
-    [InlineData(4)]
+    [InlineData(5)]
+    [InlineData(6)]
     public async Task PutQuestion_WithValidModelThatHasAnotherOwner_ReturnsForbiddenStatus(int id)
     {
         // Arrange
-        var model = new UpdateQuestionDto()
+        var model = new UpdateAnswerDto()
         {
             Id = id,
-            Topic = "Test",
             Content = "Test Content"
         };
 
         var httpContent = model.ToJsonHttpContent();
 
         // Act
-        var response = await _client_User.PutAsync("/Questions/" + id, httpContent);
+        var response = await _client_User.PutAsync("/Answers/" + id, httpContent);
 
         // Assert 
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.Forbidden);
@@ -249,12 +231,12 @@ public class QuestionsControllerTests
 
     #region Delete
     [Theory]
-    [InlineData(43)]
-    [InlineData(44)]
-    public async Task DeleteQuestion_ForAdmin_ReturnsNoContentStatus(int id)
+    [InlineData(23)]
+    [InlineData(24)]
+    public async Task DeleteAnswer_ForAdmin_ReturnsNoContentStatus(int id)
     {
         // Act
-        var response = await _client_Admin.DeleteAsync("/Questions/" + id);
+        var response = await _client_Admin.DeleteAsync("/Answers/" + id);
 
         // Assert 
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.NoContent);
@@ -263,22 +245,22 @@ public class QuestionsControllerTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public async Task DeleteQuestion_ForQuestionThatDoesntExist_ReturnsNotFoundStatus(int id)
+    public async Task DeleteAnswer_ForQuestionThatDoesntExist_ReturnsNotFoundStatus(int id)
     {
         // Act
-        var response = await _client_User.DeleteAsync("/Questions/" + id);
+        var response = await _client_User.DeleteAsync("/Answers/" + id);
 
         // Assert 
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.NotFound);
     }
 
     [Theory]
+    [InlineData(5)]
     [InlineData(6)]
-    [InlineData(7)]
-    public async Task DeleteQuestion_ForQuestionWithAnotherOwner_ReturnsForbiddenStatus(int id)
+    public async Task DeleteAnswer_ForQuestionWithAnotherOwner_ReturnsForbiddenStatus(int id)
     {
         // Act
-        var response = await _client_User.DeleteAsync("/Questions/" + id);
+        var response = await _client_User.DeleteAsync("/Answers/" + id);
 
         // Assert 
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.Forbidden);

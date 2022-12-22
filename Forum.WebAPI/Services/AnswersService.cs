@@ -42,11 +42,11 @@ public class AnswersService : IAnswersService
     {
         Answer answer = mapper.Map<Answer>(createAnswerDto);
 
-        if (answer is null) throw new Exception(StatusCodes.Status404NotFound.ToString());
+        if (answer.Content is null) throw new Exception(StatusCodes.Status400BadRequest.ToString());
         
         User user = userRepository.GetUser(u => u.Id == userService.UserId);
 
-        if (user is null) throw new Exception(StatusCodes.Status404NotFound.ToString());
+        if (user is null) throw new Exception(StatusCodes.Status401Unauthorized.ToString());
 
         answer.Author = user;
         answer.QuestionId = questionId;

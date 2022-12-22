@@ -17,12 +17,12 @@ public class AnswersController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<AnswerDto>>> GetAsync()
+    [HttpGet("GetAll")]
+    public async Task<ActionResult<IEnumerable<AnswerDto>>> GetAllAsync()
     {
         IEnumerable<AnswerDto> answersDtos = await answersService.GetAnswersAsync();
 
-        if (answersDtos is null || answersDtos.Count() == 0)
+        if (answersDtos is null)
         {
             return NotFound(answersDtos);
         }
@@ -31,7 +31,7 @@ public class AnswersController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("{id}")]
+    [HttpGet("Get/{id}")]
     public async Task<ActionResult<AnswerDto>> GetAsync(int id)
     {
         AnswerDto answerDto = await answersService.GetAnswerByIdAsync(id);
@@ -48,9 +48,23 @@ public class AnswersController : ControllerBase
     [HttpPost("{qestionId}")]
     public async Task<ActionResult> PostAsync(int qestionId, [FromBody] CreateAnswerDto creatAnswerDto)
     {
-        int answerId = await answersService.InsertAnswerAsync(qestionId, creatAnswerDto);
+        int answerId = 0;
 
-        return Created($"api/answers/{answerId}", null);
+        try
+        {
+            answerId = await answersService.InsertAnswerAsync(qestionId, creatAnswerDto);
+        }
+        catch (Exception ex)
+        {
+            if (ex.Message == "400")
+                return BadRequest();
+            else if (ex.Message == "401")
+                return Unauthorized();
+            else
+                throw;
+        }
+
+        return Created($"Answers/{answerId}", null);
     }
 
     [Authorize]
@@ -61,7 +75,20 @@ public class AnswersController : ControllerBase
         {
             return NotFound();
         }
-        await answersService.UpdateAnswerAsync(updateAnswerDto);
+
+        try
+        {
+            await answersService.UpdateAnswerAsync(updateAnswerDto);
+        }
+        catch (Exception ex)
+        {
+            if (ex.Message == "404")
+                return NotFound();
+            else if (ex.Message == "403")
+                return Forbid();
+            else
+                throw;
+        }
 
         return Ok(updateAnswerDto);
     }
@@ -70,8 +97,20 @@ public class AnswersController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        await answersService.DeleteAnswerAsync(id);
+        try
+        {
+            await answersService.DeleteAnswerAsync(id);
+        }
+        catch (Exception ex)
+        {
+            if (ex.Message == "404")
+                return NotFound();
+            else if (ex.Message == "403")
+                return Forbid();
+            else
+                throw;
+        }
 
-        return Ok();
+        return NoContent();
     }   
 }
