@@ -17,7 +17,7 @@ public class ResourceOperationRequirementHandler : AuthorizationHandler<Resource
         Guid userId = Guid.Parse(context.User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value);
 
         // Only Author and Administrator can access Update and Delete operations.
-        if (resource.question.AuthorId == userId || resource.answer.AuthorId == userId  || context.User.IsInRole("Administrator"))
+        if (resource.question.AuthorId == userId /*|| resource.answer.AuthorId == userId*/  || context.User.IsInRole("Administrator"))
         {
             context.Succeed(requirement);
         }

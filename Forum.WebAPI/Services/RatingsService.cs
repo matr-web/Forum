@@ -41,7 +41,7 @@ namespace Forum.WebAPI.Services
 
                 if (rating.Value.Equals(createRatingDto.Value)) await DeleteRatingAsync(rating.Id); // If u choose the same Value it gets deleted.
 
-                else await UpdateRatingAsync(rating, createRatingDto); // If u choose another Value it gets updated.
+                else await UpdateRatingAsync(rating, createRatingDto.Value); // If u choose another Value it gets updated.
             } 
             else if (createRatingDto.AnswerId is not null && userRatings.Any(r => r.AnswerId == createRatingDto.AnswerId)) // Same for Answer.
             {
@@ -49,9 +49,9 @@ namespace Forum.WebAPI.Services
 
                 if (rating.Value.Equals(createRatingDto.Value)) await DeleteRatingAsync(rating.Id);
 
-                else await UpdateRatingAsync(rating, createRatingDto);
+                else await UpdateRatingAsync(rating, createRatingDto.Value);
             }
-            else // If User doesn't have any Ratings, create new Rating.
+            else // If User doesn't have any Ratings for given Question/Answer, create new Rating.
             {
                 Rating rating = mapper.Map<Rating>(createRatingDto);
 
@@ -67,12 +67,12 @@ namespace Forum.WebAPI.Services
             await ratingsRepository.SaveAsync();
         }
 
-        private async Task UpdateRatingAsync(Rating rating, CreateRatingDto createRatingDto)
+        private async Task UpdateRatingAsync(Rating rating, int value)
         {
-                rating.Value = createRatingDto.Value;
+            rating.Value = value;
 
-                await ratingsRepository.UpdateRatingAsync(rating);
-                await ratingsRepository.SaveAsync();
+            await ratingsRepository.UpdateRatingAsync(rating);
+            await ratingsRepository.SaveAsync();
         }
 
         private async Task DeleteRatingAsync(int id)

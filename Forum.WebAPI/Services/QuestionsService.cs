@@ -5,6 +5,7 @@ using Forum.WebAPI.Dto_s;
 using Forum.WebAPI.Pagination;
 using Forum.WebAPI.Repositories;
 using Microsoft.AspNetCore.Authorization;
+using System.Net;
 
 namespace Forum.WebAPI.Services
 {
@@ -56,7 +57,8 @@ namespace Forum.WebAPI.Services
         {
             Question question = mapper.Map<Question>(createQuestionDto);
 
-            if (question is null) throw new Exception(StatusCodes.Status404NotFound.ToString());
+            if (question.Topic is null || question.Content is null)
+                throw new Exception(StatusCodes.Status400BadRequest.ToString());
 
             User user = userRepository.GetUser(u => u.Id == userService.UserId);
 
