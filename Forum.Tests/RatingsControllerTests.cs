@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Forum.Tests;
 
-
 /// <summary>
 /// Tests for Ratings Controller. 
 /// Tests work fine with current local db state.
