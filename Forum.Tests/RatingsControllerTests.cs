@@ -10,13 +10,13 @@ namespace Forum.Tests;
 /// Tests for Ratings Controller. 
 /// Tests work fine with current local db state.
 /// </summary>
-public class RatingsControllerTests
+public class RatingsControllerTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private HttpClient _client;
 
-    public RatingsControllerTests()
+    public RatingsControllerTests(WebApplicationFactory<Program> factory)
 	{
-        _client = new WebApplicationFactory<Program>()
+        _client = factory
             .WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>

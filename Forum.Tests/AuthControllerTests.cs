@@ -8,13 +8,13 @@ namespace Forum.Tests;
 /// Tests for Auth Controller. 
 /// Tests work fine with current local db state.
 /// </summary>
-public class AuthControllerTests
+public class AuthControllerTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private HttpClient _client;
 
-    public AuthControllerTests()
+    public AuthControllerTests(WebApplicationFactory<Program> factory)
     {
-        _client = new WebApplicationFactory<Program>().CreateClient();
+        _client = factory.CreateClient();
     }
 
     #region Register

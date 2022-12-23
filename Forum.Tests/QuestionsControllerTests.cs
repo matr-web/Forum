@@ -10,14 +10,14 @@ namespace Forum.Tests;
 /// Tests for Questions Controller. 
 /// Tests work fine with current local db state.
 /// </summary>
-public class QuestionsControllerTests
+public class QuestionsControllerTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private HttpClient _client_Admin;
     private HttpClient _client_User;
 
-    public QuestionsControllerTests()
+    public QuestionsControllerTests(WebApplicationFactory<Program> factory)
     {
-        _client_Admin = new WebApplicationFactory<Program>()
+        _client_Admin = factory
             .WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>
@@ -28,7 +28,7 @@ public class QuestionsControllerTests
             });
         }).CreateClient();
 
-        _client_User = new WebApplicationFactory<Program>()
+        _client_User = factory
             .WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
